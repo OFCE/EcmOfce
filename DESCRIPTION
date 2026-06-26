@@ -1,0 +1,28 @@
+Package: EcmOfce
+Type: Package
+Title: Error Correction Model Tools for OFCE
+Version: 0.1.0
+Authors@R: person("Elliot", "Aurissergues", email = "elliot.aurissergues@gmail.com", role = c("aut", "cre"))
+Description: Fournit des outils pour l'estimation et la présentation des modèles
+    à correction d'erreur (MCE) : tests diagnostics sur les résidus, valeurs critiques
+    d'Ericsson-MacKinnon, simulations statiques et dynamiques, et mise en tableau
+    des résultats.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    broom,
+    dplyr,
+    FinTS,
+    ggiraph,
+    ggplot2,
+    glue,
+    lmtest,
+    lubridate,
+    ofce,
+    rlang,
+    stringr,
+    tibble,
+    tidyr,
+    tseries
+Config/roxygen2/version: 8.0.0
