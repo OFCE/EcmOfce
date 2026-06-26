@@ -4,15 +4,14 @@
 #' en utilisant les dates issues de \code{bank_emeraude} (usage interne OFCE).
 #'
 #' @param estim objet \code{lm} issu de l'estimation
-#' @param bank_emeraude data.frame contenant au moins une colonne \code{date}
-#' @param date_fin date de fin de la base (chaîne "AAAA-MM-JJ", défaut : "2020-01-01")
+#' @param data data.frame contenant au moins une colonne \code{date}
 #' @return liste avec \code{plot_resid} et \code{plot_fit}
 #' @export
-make_plot_estim <- function(estim, banque, date_fin = "2020-01-01") {
+make_plot_estim <- function(estim, data) {
   sample_length <- as.numeric(length(estim[["model"]][[1]]))
-  length_bank <- as.numeric(length(dplyr::filter(banque, date < date_fin)[["date"]]))
+  length_bank <- as.numeric(length(dplyr::filter(data, date < date_fin)[["date"]]))
   init <- length_bank - sample_length + 1
-  temps_estim <- banque[["date"]][init:length_bank]
+  temps_estim <- data[["date"]]
 
   endog.value <- estim[["model"]][[1]]
   residus <- residuals(estim)
