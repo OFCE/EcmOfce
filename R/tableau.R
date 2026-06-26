@@ -161,7 +161,7 @@ coeff_tableau <- function(estim, divise_fr = TRUE) {
 #'   sont divisés par la force de rappel (voir \code{\link{coeff_tableau}})
 #' @return tibble avec les colonnes \code{Groupe}, \code{Variables} et \code{nom_col}
 #' @export
-fct_tableau_ecm <- function(table_resultats, data, estim, nom_col, affiche_dum = TRUE, divise_fr = TRUE) {
+make_table_ecm <- function(table_resultats, data, estim, nom_col, affiche_dum = TRUE, divise_fr = TRUE) {
   endog        <- all.vars(formula(estim))[1]
   var_ecart_lt <- names(estim$coefficients)[grep("ecart", names(estim$coefficients))]
   var_lt       <- grep("^(?!.*delta).*lag.*$", names(estim$coefficients), value = TRUE, perl = TRUE)
