@@ -2,6 +2,7 @@
 
 export(coeff_tableau)
 export(contribution_determinants)
+export(copy_examples)
 export(data_recursif)
 export(delta)
 export(detrend)
