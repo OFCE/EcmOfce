@@ -8,11 +8,11 @@
 #' @param date_fin date de fin de la base (chaîne "AAAA-MM-JJ", défaut : "2020-01-01")
 #' @return liste avec \code{plot_resid} et \code{plot_fit}
 #' @export
-make_plot_estim <- function(estim, bank_emeraude, date_fin = "2020-01-01") {
+make_plot_estim <- function(estim, banque, date_fin = "2020-01-01") {
   sample_length <- as.numeric(length(estim[["model"]][[1]]))
-  length_bank <- as.numeric(length(dplyr::filter(bank_emeraude, date < date_fin)[["date"]]))
+  length_bank <- as.numeric(length(dplyr::filter(banque, date < date_fin)[["date"]]))
   init <- length_bank - sample_length + 1
-  temps_estim <- bank_emeraude[["date"]][init:length_bank]
+  temps_estim <- banque[["date"]][init:length_bank]
 
   endog.value <- estim[["model"]][[1]]
   residus <- residuals(estim)
