@@ -4,19 +4,17 @@
 \alias{make_plot_estim}
 \title{Graphiques résidus et simulation statique (version simple)}
 \usage{
-make_plot_estim(estim, bank_emeraude, date_fin = "2020-01-01")
+make_plot_estim(estim, data)
 }
 \arguments{
 \item{estim}{objet \code{lm} issu de l'estimation}
 
-\item{bank_emeraude}{data.frame contenant au moins une colonne \code{date}}
-
-\item{date_fin}{date de fin de la base (chaîne "AAAA-MM-JJ", défaut : "2020-01-01")}
+\item{data}{data.frame contenant au moins une colonne \code{date}}
 }
 \value{
 liste avec \code{plot_resid} et \code{plot_fit}
 }
 \description{
-Représente la série observée vs la série simulée statiquement, et les résidus,
-en utilisant les dates issues de \code{bank_emeraude} (usage interne OFCE).
+Représente la série observée vs la série simulée statiquement, et les résidus.
+Les dates utilisées proviennent de la colonne \code{date} de \code{data}.
 }

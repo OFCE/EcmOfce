@@ -2,16 +2,16 @@
 % Please edit documentation in R/utils.R
 \name{detrend}
 \alias{detrend}
-\title{Désaisonnalisation linéaire d'une série}
+\title{Linear detrending of a series}
 \usage{
 detrend(serie)
 }
 \arguments{
-\item{serie}{vecteur numérique}
+\item{serie}{numeric vector}
 }
 \value{
-résidus de la régression sur une tendance linéaire
+residuals from regression on a linear trend
 }
 \description{
-Estime une tendance linéaire par MCO et retourne les résidus.
+Estimates a linear trend by OLS and returns the residuals.
 }

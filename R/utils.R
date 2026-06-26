@@ -1,8 +1,8 @@
-#' Différence d'ordre n d'une série
+#' Lagged difference of order n
 #'
-#' @param n ordre du décalage (défaut : 1)
-#' @param x vecteur numérique
-#' @return vecteur de même longueur que x, avec n NA en tête
+#' @param n lag order (default: 1)
+#' @param x numeric vector
+#' @return vector of same length as x, with n leading NAs
 #' @export
 delta <- function(n = 1, x) {
   diff.x <- diff(x, lag = n)
@@ -10,12 +10,26 @@ delta <- function(n = 1, x) {
 }
 
 
-#' Désaisonnalisation linéaire d'une série
+#' Format numbers for display (French typography)
 #'
-#' Estime une tendance linéaire par MCO et retourne les résidus.
+#' Formats numbers with a narrow non-breaking space as thousands separator
+#' and a comma as decimal mark, suitable for OFCE tables and tooltips.
 #'
-#' @param serie vecteur numérique
-#' @return résidus de la régression sur une tendance linéaire
+#' @param x numeric vector
+#' @param digits number of decimal places (default: 1)
+#' @return character vector of formatted values
+#' @export
+fmt_val <- function(x, digits = 1) {
+  formatC(x = x, digits = digits, big.mark = ".", decimal.mark = ",", format = "f")
+}
+
+
+#' Linear detrending of a series
+#'
+#' Estimates a linear trend by OLS and returns the residuals.
+#'
+#' @param serie numeric vector
+#' @return residuals from regression on a linear trend
 #' @export
 detrend <- function(serie) {
   data <- data.frame(temps = seq_along(serie), serie)

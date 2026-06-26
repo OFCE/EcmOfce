@@ -2,26 +2,40 @@
 % Please edit documentation in R/plots.R
 \name{make_plot_simul_dynamique}
 \alias{make_plot_simul_dynamique}
-\title{Graphique de simulation dynamique}
+\title{Dynamic simulation plots: level, quarterly growth and annual change}
 \usage{
-make_plot_simul_dynamique(estim, data, debut_graph = NULL, debut_simul = NULL)
+make_plot_simul_dynamique(
+  estim,
+  data,
+  debut_graph = NULL,
+  debut_simul = NULL,
+  debut_prev = NULL,
+  col_observe = "#003189",
+  col_simul = "#e75c58"
+)
 }
 \arguments{
-\item{estim}{objet \code{lm} issu de l'estimation du MCE}
+\item{estim}{\code{lm} object from MCE estimation}
 
-\item{data}{data.frame contenant au moins une colonne \code{date} et toutes
-les variables de l'équation}
+\item{data}{data.frame with at least a \code{date} column and all equation variables}
 
-\item{debut_graph}{première date affichée ; si \code{NULL}, première date sans NA}
+\item{debut_graph}{first date displayed; if \code{NULL}, first non-NA date}
 
-\item{debut_simul}{date de début de la simulation ; si \code{NULL}, première date sans NA}
+\item{debut_simul}{simulation start date; if \code{NULL}, same as \code{debut_graph}}
+
+\item{debut_prev}{forecast start date (greyed area); if \code{NULL} (default), no shading}
+
+\item{col_observe}{colour for observed series (default: \code{"#003189"})}
+
+\item{col_simul}{colour for simulated series (default: \code{"#e75c58"})}
 }
 \value{
-objet \code{ggplot} interactif
+list with \code{plot_niveau}, \code{plot_g_trim} and \code{plot_g_an}
 }
 \description{
-Produit un graphique interactif comparant la série observée à la simulation
-dynamique calculée par \code{\link{simulation_dynamique}}.
-Les indicatrices de la forme \code{i[annee]q[trimestre]} sont représentées
-par des bandes grises verticales.
+Produces three interactive plots comparing the observed series to the dynamic
+simulation from \code{\link{simulation_dynamique}}: in level, in quarterly
+growth, and in annual change. Each plot is a \pkg{patchwork} assembly of the
+main panel and the residual panel. Dummy variables of the form
+\code{i[year]q[quarter]} are shown as grey vertical bands.
 }

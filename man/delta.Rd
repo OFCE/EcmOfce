@@ -2,18 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{delta}
 \alias{delta}
-\title{Différence d'ordre n d'une série}
+\title{Lagged difference of order n}
 \usage{
 delta(n = 1, x)
 }
 \arguments{
-\item{n}{ordre du décalage (défaut : 1)}
+\item{n}{lag order (default: 1)}
 
-\item{x}{vecteur numérique}
+\item{x}{numeric vector}
 }
 \value{
-vecteur de même longueur que x, avec n NA en tête
+vector of same length as x, with n leading NAs
 }
 \description{
-Différence d'ordre n d'une série
+Lagged difference of order n
 }
