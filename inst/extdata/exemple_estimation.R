@@ -10,7 +10,7 @@ library(ofce)
 
 
 
-data<-readRDS("data.rds")
+data<-readRDS("exemple_data.rds")
 data<-mutate(data, log_compet=log(p6_d2)-log(ipimmdf)-log(dollareuro),
                     #logarithme d'un ratio de prix relatifs corrigé du taux de change : prix domestiques à l'exportation (déflateur des exportations) - prix des concurrents à l'exportation corrigé du taux de change 
                     ecart_export_lt=log(lag(p6_d1,1))-log(lag(iqimmsf,1)),

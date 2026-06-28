@@ -20,7 +20,7 @@ library(gt)
 
 
 
-data<- readRDS("data.rds")
+data<- readRDS("exemple_data.rds")
 
 
 
