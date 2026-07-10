@@ -249,7 +249,7 @@ coeff_tableau <- function(estim, divise_fr = TRUE) {
     value = glue::glue("{round(estimate, 3)}{stars} <br>({round(statistic, 2)})")
   )
 
-  stats::setNames(coef_info$value, coef_info$term)
+  return(stats::setNames(coef_info$value, coef_info$term))
 }
 
 
@@ -383,5 +383,7 @@ make_table_ecm <- function(table_resultats, data, estim, nom_col, affiche_dum = 
     dum    = ifelse(grepl("^i.*q.*", Variables), Variables, NA)
   )
   table_resultats <- dplyr::arrange(table_resultats, Groupe, dum)
-  dplyr::select(table_resultats, -dum)
+  table_resultats <- dplyr::select(table_resultats, -dum)
+  
+  return(table_resultats)
 }
