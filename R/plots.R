@@ -117,9 +117,11 @@ make_plot_estim2 <- function(estim, data) {
   )
   graphic.data <- dplyr::mutate(
     graphic.data,
-    tooltip_resid = glue::glue("<b>{date}</b><br>Residu : {round(residus, 3)}"),
-    tooltip_pred  = glue::glue("<b>{date}</b><br>Simulation : {round(prediction * 100, 2)}%"),
-    tooltip_endog = glue::glue("<b>{date}</b><br>Observe : {round(endog * 100, 2)}%")
+    tooltip_resid = glue::glue("<b>{date}</b><br>Residu : {ofce::fmt_val(residus, 3)}"),
+    tooltip_pred  = glue::glue("<b>{date}</b><br>Simulation : {ofce::fmt_val(prediction*100, 2)}%"),
+    tooltip_endog = glue::glue("<b>{date}</b><br>Observe : {ofce::fmt_val(endog*100, 2)}%"),
+    tooltip_pred_niv = glue::glue("<b>{temps}</b><br>Simulation : {ofce::fmt_val(prediction_niveau, 1)}"),
+    tooltip_endog_niv = glue::glue("<b>{temps}</b><br>Observé : {ofce::fmt_val(endog_niveau, 1)}")
   )
 
   plot_resid <- ggplot2::ggplot(graphic.data, ggplot2::aes(x = date, y = residus)) +
@@ -159,13 +161,25 @@ make_plot_estim2 <- function(estim, data) {
   plot_fit_niv <- ggplot2::ggplot(graphic.data, ggplot2::aes(x = date)) +
     ggplot2::geom_line(ggplot2::aes(y = endog_niveau, color = "Observe")) +
     ggplot2::geom_line(ggplot2::aes(y = prediction_niveau, color = "Simulation")) +
+    ggiraph::geom_point_interactive(
+      ggplot2::aes(y = endog_niveau, tooltip = tooltip_endog_niv, data_id = date, fill = "Observe"),
+      shape = 21, size = 1.5, color = "white", hover_nearest = TRUE
+    ) +
+    ggiraph::geom_point_interactive(
+      ggplot2::aes(y = prediction_niveau, tooltip = tooltip_pred_niv, data_id = date, fill = "Simulation"),
+      shape = 21, size = 1.5, color = "white", hover_nearest = TRUE
+    ) +
     ggplot2::ggtitle(paste0(endog_niveau.name, ": Observations / Simulation statique")) +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) +
     ofce::theme_ofce() +
     ofce::scale_ofce_date(date_breaks = "1 years") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
     ggplot2::labs(x = NULL, y = NULL, color = NULL) +
-    ggplot2::scale_color_manual(values = c("Observe" = "blue", "Simulation" = "red"))
+    ggplot2::scale_color_manual(
+      values = c("Observe" = "blue", "Simulation" = "red"),
+      aesthetics = c("fill", "color")
+    ) +
+    ggplot2::guides(fill = "none")
 
   list(plot_resid = plot_resid, plot_fit = plot_fit, plot_fit_niv = plot_fit_niv)
 }
@@ -222,9 +236,9 @@ make_plot_simul_dynamique <- function(estim, data, debut_graph = NULL, debut_sim
   graph_niv <- dplyr::mutate(
     dplyr::select(data_dynam, date, observe, simul_dynamique, residu, observe_g_trim, simul_g_trim),
     var          = dplyr::case_when(residu > 0 ~ "Observe", residu < 0 ~ "Simule", TRUE ~ NA_character_),
-    tooltip_obs  = glue::glue("<b>{.date_trim(date)}</b><br>Observe : {fmt_val(observe, 0)}<br>Croissance trim. : {fmt_val(observe_g_trim * 100, 1)}%"),
-    tooltip_sim  = glue::glue("<b>{.date_trim(date)}</b><br>Simule : {fmt_val(simul_dynamique, 0)}<br>Croissance trim. : {fmt_val(simul_g_trim * 100, 1)}%"),
-    tooltip_resid = glue::glue("<b>{.date_trim(date)}</b><br>Residu : {fmt_val(residu, 0)}")
+    tooltip_obs  = glue::glue("<b>{.date_trim(date)}</b><br>Observe : {ofce::fmt_val(observe, 0)}<br>Croissance trim. : {ofce::fmt_val(observe_g_trim * 100, 1)}%"),
+    tooltip_sim  = glue::glue("<b>{.date_trim(date)}</b><br>Simule : {ofce::fmt_val(simul_dynamique, 0)}<br>Croissance trim. : {ofce::fmt_val(simul_g_trim * 100, 1)}%"),
+    tooltip_resid = glue::glue("<b>{.date_trim(date)}</b><br>Residu : {ofce::fmt_val(residu, 0)}")
   )
 
   g_resid_niv <- ggplot2::ggplot(graph_niv) +
@@ -288,9 +302,9 @@ make_plot_simul_dynamique <- function(estim, data, debut_graph = NULL, debut_sim
   graph_gt <- dplyr::mutate(
     dplyr::select(data_dynam, date, observe_g_trim, simul_g_trim, residu_g_trim),
     var          = dplyr::case_when(residu_g_trim > 0 ~ "Observe", residu_g_trim < 0 ~ "Simule", TRUE ~ NA_character_),
-    tooltip_obs  = glue::glue("<b>{.date_trim(date)}</b><br>Observe : {fmt_val(observe_g_trim * 100, 1)}%"),
-    tooltip_sim  = glue::glue("<b>{.date_trim(date)}</b><br>Simule : {fmt_val(simul_g_trim * 100, 1)}%"),
-    tooltip_resid = glue::glue("<b>{.date_trim(date)}</b><br>Residu : {fmt_val(residu_g_trim * 100, 1)}%")
+    tooltip_obs  = glue::glue("<b>{.date_trim(date)}</b><br>Observe : {ofce::fmt_val(observe_g_trim * 100, 1)}%"),
+    tooltip_sim  = glue::glue("<b>{.date_trim(date)}</b><br>Simule : {ofce::fmt_val(simul_g_trim * 100, 1)}%"),
+    tooltip_resid = glue::glue("<b>{.date_trim(date)}</b><br>Residu : {ofce::fmt_val(residu_g_trim * 100, 1)}%")
   )
 
   g_resid_gt <- ggplot2::ggplot(graph_gt) +
@@ -314,9 +328,10 @@ make_plot_simul_dynamique <- function(estim, data, debut_graph = NULL, debut_sim
     ) +
     ggplot2::labs(y = NULL) +
     ggplot2::scale_y_continuous(
-      limits = function(lims) c(min(lims[1], -0.02), max(lims[2], 0.02)),
-      breaks = scales::pretty_breaks(2),
-      labels = scales::percent_format(accuracy = 1)
+      limits = c(-0.01, 0.01),
+      breaks = c(-0.01, 0, 0.01),
+      labels = scales::percent_format(accuracy = 1),
+      oob    = scales::oob_squish
     ) +
     ofce::scale_ofce_date(date_breaks = "2 years") +
     ofce::theme_ofce(plot.margin = ggplot2::margin(t = 0))
@@ -355,9 +370,9 @@ make_plot_simul_dynamique <- function(estim, data, debut_graph = NULL, debut_sim
   graph_ga <- dplyr::mutate(
     dplyr::select(data_dynam, date, observe_g_an, simul_g_an, residu_g_an),
     var          = dplyr::case_when(residu_g_an > 0 ~ "Observe", residu_g_an < 0 ~ "Simule", TRUE ~ NA_character_),
-    tooltip_obs  = glue::glue("<b>{.date_trim(date)}</b><br>Observe : {fmt_val(observe_g_an * 100, 1)}%"),
-    tooltip_sim  = glue::glue("<b>{.date_trim(date)}</b><br>Simule : {fmt_val(simul_g_an * 100, 1)}%"),
-    tooltip_resid = glue::glue("<b>{.date_trim(date)}</b><br>Residu : {fmt_val(residu_g_an * 100, 1)}%")
+    tooltip_obs  = glue::glue("<b>{.date_trim(date)}</b><br>Observe : {ofce::fmt_val(observe_g_an * 100, 1)}%"),
+    tooltip_sim  = glue::glue("<b>{.date_trim(date)}</b><br>Simule : {ofce::fmt_val(simul_g_an * 100, 1)}%"),
+    tooltip_resid = glue::glue("<b>{.date_trim(date)}</b><br>Residu : {ofce::fmt_val(residu_g_an * 100, 1)}%")
   )
 
   g_resid_ga <- ggplot2::ggplot(graph_ga) +
@@ -381,9 +396,10 @@ make_plot_simul_dynamique <- function(estim, data, debut_graph = NULL, debut_sim
     ) +
     ggplot2::labs(y = NULL) +
     ggplot2::scale_y_continuous(
-      limits = function(lims) c(min(lims[1], -0.02), max(lims[2], 0.02)),
-      breaks = scales::pretty_breaks(2),
-      labels = scales::percent_format(accuracy = 1)
+      limits = c(-0.02, 0.02),
+      breaks = c(-0.02, 0, 0.02),
+      labels = scales::percent_format(accuracy = 1),
+      oob    = scales::oob_squish
     ) +
     ofce::scale_ofce_date(date_breaks = "2 years") +
     ofce::theme_ofce(plot.margin = ggplot2::margin(t = 0))
