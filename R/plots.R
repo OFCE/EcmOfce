@@ -120,8 +120,8 @@ make_plot_estim2 <- function(estim, data) {
     tooltip_resid = glue::glue("<b>{date}</b><br>Residu : {ofce::fmt_val(residus, 3)}"),
     tooltip_pred  = glue::glue("<b>{date}</b><br>Simulation : {ofce::fmt_val(prediction*100, 2)}%"),
     tooltip_endog = glue::glue("<b>{date}</b><br>Observe : {ofce::fmt_val(endog*100, 2)}%"),
-    tooltip_pred_niv = glue::glue("<b>{temps}</b><br>Simulation : {ofce::fmt_val(prediction_niveau, 1)}"),
-    tooltip_endog_niv = glue::glue("<b>{temps}</b><br>Observé : {ofce::fmt_val(endog_niveau, 1)}")
+    tooltip_pred_niv = glue::glue("<b>{date}</b><br>Simulation : {ofce::fmt_val(prediction_niveau, 1)}"),
+    tooltip_endog_niv = glue::glue("<b>{date}</b><br>Observé : {ofce::fmt_val(endog_niveau, 1)}")
   )
 
   plot_resid <- ggplot2::ggplot(graphic.data, ggplot2::aes(x = date, y = residus)) +

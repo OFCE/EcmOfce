@@ -241,7 +241,7 @@ make_plot_recursif <- function(data, model, start, end,
     ggplot2::scale_y_continuous(
       breaks = seq(floor(ymin), ceiling(ymax), by = 1), 
       limits = c(ymin, ymax), 
-      oob = scales::scales::oob_squish
+      oob = scales::oob_squish
     ) +
     { if (plot_var_ct) {
         ggplot2::scale_alpha_manual(values = c("FALSE" = 1, "TRUE" = 0.3), guide = "none")
