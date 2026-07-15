@@ -184,18 +184,28 @@ make_plot_recursif <- function(data, model, start, end,
     annee_dummies     <- as.numeric(substr(dummies, 2, 5))
     trim_dummies      <- as.numeric(substr(dummies, 7, 7))
     date_dummies <- as.Date(paste(annee_dummies, (trim_dummies - 1) * 3 + 1, "01", sep = "-"))
-    date_dummies <- date_dummies[date_dummies > dplyr::first(df.param$date)]
+    date_dummies <- date_dummies[date_dummies>min(df.param$date) & date_dummies<max(df.param$date)]
     if (length(date_dummies) > 0) {
       rects <- data.frame(
         xmin    = lubridate::`%m+%`(date_dummies, months(-1)) - lubridate::days(15),
         xmax    = lubridate::`%m+%`(date_dummies, months(1))  + lubridate::days(15),
         ymin    = -Inf,
         ymax    = Inf,
-        tooltip = paste0("Indicatrice au ", .date_trim(date_dummies))
+        tooltip = paste0("Indicatrice au ", ofce::date_trim(date_dummies))
       )
     }
   }
 
+  titre <- if (date_debut_fixe) {
+    lignes <- as.numeric(rownames(model.frame(model, data = data)))
+    date_debut <- ofce::date_trim(min(data$date[lignes]))
+    paste0("Estimation recursive, début de periode en ", date_debut)
+  } else {
+    lignes <- as.numeric(rownames(model.frame(model, data = data)))
+    date_fin <- ofce::date_trim(max(data$date[lignes]))
+    paste0("Estimation recursive, fin de periode en ", date_fin)
+  }
+  
   # Mise en forme longue
   df.long <- tidyr::pivot_longer(df.param, -date)
   tstat_long <- tidyr::pivot_longer(df.tstat, -date, values_to = "tstat")
@@ -205,22 +215,16 @@ make_plot_recursif <- function(data, model, start, end,
   df.long <- dplyr::mutate(
     df.long,
     delta = grepl("delta", name),
-    tooltip = glue::glue(
-      "<b>{.date_trim(date)}</b><br><b>{name}</b><br>Coefficient : {ofce::fmt_val(value, 3)}<br>T-stat : {ofce::fmt_val(tstat, 3)}"
-    ),
+    tooltip = if (date_debut_fixe) {
+      glue::glue("<b>Période {date_debut} - {ofce::date_trim(date)}</b><br><b>{name}</b><br>Coefficient : {ofce::fmt_val(value, 3)}<br>T-stat : {ofce::fmt_val(tstat, 3)}")
+    } else {
+      glue::glue("<b>Période {ofce::date_trim(date)} - {date_fin}</b><br><b>{name}</b><br>Coefficient : {ofce::fmt_val(value, 3)}<br>T-stat : {ofce::fmt_val(tstat, 3)}")
+    },
     name = forcats::fct_relevel(name, "Force de rappel", after = 0)
   )
 
   ymin_lim <- max(min(df.long$value, na.rm = TRUE), -3)
   ymax_lim <- min(max(df.long$value, na.rm = TRUE),  3)
-
-  titre <- if (date_debut_fixe) {
-    lignes <- as.numeric(rownames(model.frame(model, data = data)))
-    paste0("Estimation recursive, periode : ", .date_trim(min(data$date[lignes])), " - ...")
-  } else {
-    lignes <- as.numeric(rownames(model.frame(model, data = data)))
-    paste0("Estimation recursive, periode : ... - ", .date_trim(max(data$date[lignes])))
-  }
 
   p <- ggplot2::ggplot(data = df.long) +
     { if (!is.null(rects)) {
@@ -239,8 +243,8 @@ make_plot_recursif <- function(data, model, start, end,
     ggplot2::theme(legend.position = "bottom") +
     ofce::scale_ofce_date(date_breaks = "2 years") +
     ggplot2::scale_y_continuous(
-      breaks = seq(floor(ymin), ceiling(ymax), by = 1), 
-      limits = c(ymin, ymax), 
+      breaks = seq(floor(ymin_lim), ceiling(ymax_lim), by = 1), 
+      limits = c(ymin_lim, ymax_lim), 
       oob = scales::oob_squish
     ) +
     { if (plot_var_ct) {

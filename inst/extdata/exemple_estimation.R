@@ -42,3 +42,7 @@ ofce::girafy(make_plot_estim2(estim=estim,data=data)[["plot_resid"]])
 
 simul_dyn<-simulation_dynamique(estim=estim,data=data)
 ofce::girafy(make_plot_simul_dynamique(estim=estim,data=data)[["plot_niveau"]])
+ofce::girafy(make_plot_simul_dynamique(estim=estim,data=data)[["plot_g_an"]])
+
+ofce::girafy(make_plot_recursif(data=data, model=model, start=min(data$date), end=max(data$date), date_debut_fixe=TRUE))
+ofce::girafy(make_plot_recursif(data=data, model=model, start=min(data$date), end=max(data$date), date_debut_fixe=FALSE))
