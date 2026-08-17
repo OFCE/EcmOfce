@@ -53,7 +53,7 @@ data_recursif <- function(data, model, start, end,
   var_ct <- setdiff(vars, var_lt)
   if (isTRUE(check_presence_var_ecart_lt)){
     var_force_rappel <- vars[grep("ecart", vars)]
-    message(glue("Le coefficient de la variable {var_force_rappel} est la force de rappel"))
+    message(glue::glue("Le coefficient de la variable {var_force_rappel} est la force de rappel"))
   }else{
     var_force_rappel <- var_lt[grepl(endog, var_lt)]
   }

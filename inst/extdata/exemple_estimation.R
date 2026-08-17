@@ -1,17 +1,17 @@
 rm(list =ls())
+
 library(tidyverse)
 library(lmtest)
-
 library(tseries)
 library(FinTS)
 library(EcmOfce)
 library(ggiraph)
 library(ofce)
-
+conflicted::conflicts_prefer(dplyr::lag)
 
 
 data<-readRDS("exemple_data.rds")
-data<-mutate(data, log_compet=log(p6_d2)-log(ipimmdf)-log(dollareuro),
+data<-dplyr::mutate(data, log_compet=log(p6_d2)-log(ipimmdf)-log(dollareuro),
                     #logarithme d'un ratio de prix relatifs corrigé du taux de change : prix domestiques à l'exportation (déflateur des exportations) - prix des concurrents à l'exportation corrigé du taux de change 
                     ecart_export_lt=log(lag(p6_d1,1))-log(lag(iqimmsf,1)),
                     #exportations en volumes (période t-1) - demande mondiale adressée à la France (correcteur dans le MCE)
@@ -30,7 +30,7 @@ model<-delta(1,log(p6_d1))~offset(delta(1,log(iqimmsf)))+I(log(lag(p6_d1,1))-log
   lag(iqimmsf_gap,1)+
   i2020q1 + i2020q2 +i2020q3+i2023q2+i2022q1
 
-data<-data%>%filter(date>"1996-10-01" & date<as.Date("2024-01-01"))
+data<-data%>%dplyr::filter(date>"1996-10-01" & date<as.Date("2024-01-01"))
 
 estim<-lm(model,data)
 summary(estim)

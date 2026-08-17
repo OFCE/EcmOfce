@@ -93,20 +93,17 @@ make_plot_estim2 <- function(estim, data) {
   prediction <- fitted(estim)
 
   endog_niveau.name  <- all.vars(formula(estim))[1]
-  endog_niveau.value <- data[[endog_niveau.name]][lignes_utilisees]
-  ylag <- lag(
-    log(data[[endog_niveau.name]][(min(lignes_utilisees) - 1):max(lignes_utilisees)]),
-    1
-  )[-1]
-  prediction_niveau <- exp(prediction + ylag)
-
+  endog_niveau.value <- data[[endog_niveau.name]][(min(lignes_utilisees) - 1):max(lignes_utilisees)]
+  endog_niveau.lag.log <- dplyr::lag(log(endog_niveau.value),1)
+  prediction_niveau <- exp(prediction + endog_niveau.lag.log[-1])
+  
   graphic.data <- cbind(
     date = temps_estim,
     data.frame(
       endog             = endog.value,
       residus           = residus,
       prediction        = prediction,
-      endog_niveau      = endog_niveau.value,
+      endog_niveau      = endog_niveau.value[-1],
       prediction_niveau = prediction_niveau
     )
   )
@@ -487,12 +484,12 @@ make_plot_comparaison_simul <- function(estim_list, data_list,
     observe_g_trim = (observe - dplyr::lag(observe, 1)) / dplyr::lag(observe, 1),
     simul_g_trim   = (simul_dynamique - dplyr::lag(simul_dynamique, 1)) / dplyr::lag(simul_dynamique, 1),
     residu_g_trim  = round(observe_g_trim - simul_g_trim, 10),
-    tooltip_obs          = glue::glue("<b>{ofce::date_trim(date)}</b><br>Observe : {fmt_val(observe, 0)}"),
-    tooltip_sim          = glue::glue("<b>{ofce::date_trim(date)}</b><br>Simule ({courbe}) : {fmt_val(simul_dynamique, 0)}"),
-    tooltip_resid        = glue::glue("<b>{ofce::date_trim(date)}</b><br>Residu ({courbe}) : {fmt_val(residu, 0)}"),
-    tooltip_sim_gt       = glue::glue("<b>{ofce::date_trim(date)}</b><br>Simule ({courbe}) : {fmt_val(simul_g_trim * 100, 1)}%"),
-    tooltip_obs_gt       = glue::glue("<b>{ofce::date_trim(date)}</b><br>Observe : {fmt_val(observe_g_trim * 100, 1)}%"),
-    tooltip_resid_gt     = glue::glue("<b>{ofce::date_trim(date)}</b><br>Residu ({courbe}) : {fmt_val(residu_g_trim * 100, 1)}%")
+    tooltip_obs          = glue::glue("<b>{ofce::date_trim(date)}</b><br>Observe : {ofce::fmt_val(observe, 0)}"),
+    tooltip_sim          = glue::glue("<b>{ofce::date_trim(date)}</b><br>Simule ({courbe}) : {ofce::fmt_val(simul_dynamique, 0)}"),
+    tooltip_resid        = glue::glue("<b>{ofce::date_trim(date)}</b><br>Residu ({courbe}) : {ofce::fmt_val(residu, 0)}"),
+    tooltip_sim_gt       = glue::glue("<b>{ofce::date_trim(date)}</b><br>Simule ({courbe}) : {ofce::fmt_val(simul_g_trim * 100, 1)}%"),
+    tooltip_obs_gt       = glue::glue("<b>{ofce::date_trim(date)}</b><br>Observe : {ofce::fmt_val(observe_g_trim * 100, 1)}%"),
+    tooltip_resid_gt     = glue::glue("<b>{ofce::date_trim(date)}</b><br>Residu ({courbe}) : {ofce::fmt_val(residu_g_trim * 100, 1)}%")
   )
   data_dynam <- dplyr::ungroup(data_dynam)
 
