@@ -11,8 +11,7 @@ make_plot_recursif(
   end,
   date_debut_fixe = TRUE,
   plot_var_ct = FALSE,
-  dummies = NULL,
-  date_tableau = NULL
+  dummies = NULL
 )
 }
 \arguments{
@@ -29,9 +28,6 @@ make_plot_recursif(
 \item{plot_var_ct}{si \code{TRUE}, affiche toutes les variables (hors dummies)}
 
 \item{dummies}{vecteur d'indicatrices à gérer dynamiquement ; \code{NULL} par défaut}
-
-\item{date_tableau}{date effectivement utilisée dans le tableau de résultats ;
-si non \code{NULL}, une ligne pointillée est ajoutée}
 }
 \value{
 objet \code{ggplot} interactif
@@ -40,5 +36,4 @@ objet \code{ggplot} interactif
 Pour chaque variable du modèle, représente l'évolution du coefficient
 selon la période d'estimation (date de fin ou de début variable).
 Les t-statistiques sont affichées dans le tooltip interactif.
-Une ligne pointillée optionnelle marque la date effectivement retenue.
 }
