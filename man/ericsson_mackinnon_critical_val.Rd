@@ -4,19 +4,31 @@
 \alias{ericsson_mackinnon_critical_val}
 \title{Valeurs critiques d'Ericsson-MacKinnon}
 \usage{
-ericsson_mackinnon_critical_val(d, k)
+ericsson_mackinnon_critical_val(d, k, size, h)
 }
 \arguments{
 \item{d}{termes déterministes : \code{"nc"} (aucun), \code{"c"} (constante),
-\code{"ct"} (constante + trend), \code{"ctt"} (constante + deux trends)}
+\code{"ct"} (constante + trend). \code{"ctt"} n'est pas codé.}
 
-\item{k}{nombre de régresseurs (entier entre 1 et 11)}
+\item{k}{nombre de variables dans x (entier entre 1 et 8)}
+
+\item{size}{taille de l'échantillon}
+
+\item{h}{nombre total de régresseurs (i.e. de coefficients non contraints)}
 }
 \value{
 vecteur numérique de longueur 3 : valeurs critiques à 1%, 5%, 10%
 }
 \description{
 Retourne les valeurs critiques aux seuils de 1%, 5% et 10% pour le test
-de cointégration d'Ericsson-MacKinnon selon les termes déterministes et le
-nombre de régresseurs.
+de cointégration de Ericsson et MacKinnon (2000), selon les termes déterministes (d), le
+nombre de variables dans x (k), la taille de l'échantillon (size) et le nombre de regresseurs non contraints (h),
+en utilisant la formule de surface de réponse
+q(Ti) = theta_inf + theta_1/(Ta)^1 + theta_2/(Ta)^2 + theta_3/(Ta)^3,
+où Ta est la taille d'échantillon ajustée (size - h).
+}
+\details{
+Référence : Ericsson, N. R., & MacKinnon, J. G. (2002). Distributions of
+error correction tests for cointegration. Econometrics Journal, 5(2), 285-318.
+(Tables 2, 3 et 4 pour les coefficients theta)
 }

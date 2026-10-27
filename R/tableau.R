@@ -1,79 +1,182 @@
 #' Valeurs critiques d'Ericsson-MacKinnon
 #'
 #' Retourne les valeurs critiques aux seuils de 1%, 5% et 10% pour le test
-#' de cointégration d'Ericsson-MacKinnon selon les termes déterministes et le
-#' nombre de régresseurs.
+#' de cointégration de Ericsson et MacKinnon (2000), selon les termes déterministes (d), le
+#' nombre de variables dans x (k), la taille de l'échantillon (size) et le nombre de regresseurs non contraints (h),
+#' en utilisant la formule de surface de réponse
+#' q(Ti) = theta_inf + theta_1/(Ta)^1 + theta_2/(Ta)^2 + theta_3/(Ta)^3,
+#' où Ta est la taille d'échantillon ajustée (size - h).
+#' 
+#' Référence : Ericsson, N. R., & MacKinnon, J. G. (2002). Distributions of
+#' error correction tests for cointegration. Econometrics Journal, 5(2), 285-318.
+#' (Tables 2, 3 et 4 pour les coefficients theta)
 #'
 #' @param d termes déterministes : \code{"nc"} (aucun), \code{"c"} (constante),
-#'   \code{"ct"} (constante + trend), \code{"ctt"} (constante + deux trends)
-#' @param k nombre de régresseurs (entier entre 1 et 11)
+#'   \code{"ct"} (constante + trend). \code{"ctt"} n'est pas codé.
+#' @param k nombre de variables dans x (entier entre 1 et 8)
+#' @param size taille de l'échantillon
+#' @param h nombre total de régresseurs (i.e. de coefficients non contraints)
 #' @return vecteur numérique de longueur 3 : valeurs critiques à 1%, 5%, 10%
 #' @export
-ericsson_mackinnon_critical_val <- function(d, k) {
-  d_autorise <- c("nc", "c", "ct", "ctt")
-  if (!(d %in% d_autorise)) {
-    stop(sprintf("Argument 'd' doit etre l'un de : %s", paste(d_autorise, collapse = ", ")))
+ericsson_mackinnon_critical_val <- function(d, k, size, h) {
+  if (isFALSE(d %in% c("nc", "c", "ct"))) {
+    stop(sprintf("Argument 'd' doit être l'un de : %s", paste(c("nc", "c", "ct"), collapse = ", ")))
   }
-
-  table_cv <- list(
-    nc = rbind(
-      c(-2.5659, -1.9408, -1.6167),
-      c(-3.2106, -2.5937, -2.2643),
-      c(-3.6215, -3.0048, -2.6744),
-      c(-3.9433, -3.3268, -2.9942),
-      c(-4.2168, -3.5978, -3.2637),
-      c(-4.4585, -3.8373, -3.5022),
-      c(-4.6763, -4.0535, -3.7165),
-      c(-4.8772, -4.2513, -3.9135),
-      c(-5.0634, -4.4363, -4.2693),
-      c(-5.2381, -4.6093, -4.2693),
-      c(-5.4039, -4.7734, -4.4324)
-    ),
-    c = rbind(
-      c(-3.4307, -2.8617, -2.5668),
-      c(-3.7948, -3.2145, -2.9083),
-      c(-4.0947, -3.5057, -3.1924),
-      c(-4.3555, -3.7592, -3.4412),
-      c(-4.5859, -3.9856, -3.6635),
-      c(-4.7970, -4.1922, -3.8670),
-      c(-4.9912, -4.3831, -4.0556),
-      c(-5.1723, -4.5608, -4.2310),
-      c(-5.3437, -4.7287, -4.3975),
-      c(-5.5048, -4.8876, -4.5543),
-      c(-5.6588, -5.0394, -4.7055)
-    ),
-    ct = rbind(
-      c(-3.9593, -3.4108, -3.1272),
-      c(-4.2488, -3.6873, -3.3927),
-      c(-4.4981, -3.9263, -3.6249),
-      c(-4.7214, -4.1421, -3.8342),
-      c(-4.9255, -4.3392, -4.0271),
-      c(-5.1137, -4.5227, -4.2067),
-      c(-5.2923, -4.6952, -4.3751),
-      c(-5.4565, -4.8569, -4.5344),
-      c(-5.6149, -5.0108, -4.6864),
-      c(-5.7657, -5.1582, -4.8311),
-      c(-5.9099, -5.2992, -4.9707)
-    ),
-    ctt = rbind(
-      c(-4.3714, -3.8324, -3.5534),
-      c(-4.6190, -4.0683, -3.7800),
-      c(-4.8399, -4.2790, -3.9833),
-      c(-5.0396, -4.4716, -4.1701),
-      c(-5.2256, -4.6498, -4.3438),
-      c(-5.3998, -4.8177, -4.5073),
-      c(-5.5652, -4.9774, -4.6629),
-      c(-5.7181, -5.1265, -4.8098),
-      c(-5.8656, -5.2703, -4.9510),
-      c(-6.0083, -5.4083, -5.0863),
-      c(-6.1449, -5.5415, -5.2176)
-    )
+  if (isFALSE(k >= 1 & k <= 8)) {
+    stop("Les valeurs critiques ne sont codées que pour k compris entre 1 et 8")
+  }
+  
+  # Fonction de création des matrices
+  mat <- function(x) {
+    x <- matrix(x, ncol = 4, byrow = TRUE)
+    colnames(x) <- c("theta_inf", "theta_1", "theta_2", "theta_3")
+    rownames(x) <- c("1pct", "5pct", "10pct")
+    return(x)
+  }
+  
+  # Coefficients theta - no deterministic terms - Table 2, Ericsson, MacKinnon (2000)
+  ecm_nc <- list(
+    k1 = mat(c(
+      -2.5659, -2.19, -3.6, 26,
+      -1.9408, -0.35, 0.6, -17,
+      -1.6167, 0.23, -1.0, -6
+    )),
+    k2 = mat(c(
+      -3.2106, -4.69, -10.5, 48,
+      -2.5937, -1.53, -0.8, -24,
+      -2.2643, -0.41, -1.5, -9
+    )),
+    k3 = mat(c(
+      -3.6215, -6.14, -5.3, -67,
+      -3.0048, -2.11, 2.1, -61,
+      -2.6744, -0.57, 1.2, -44
+    )),
+    k4 = mat(c(
+      -3.9433, -7.15, -3.1, -69,
+      -3.3268, -2.04, -6.4, 19,
+      -2.9942, -0.21, -5.1, 13
+    )),
+    k5 = mat(c(
+      -4.2168, -7.66, -2.1, -87,
+      -3.5978, -1.92, -3.6, -17,
+      -3.2637, 0.25, -4.2, -15
+    )),
+    k6 = mat(c(
+      -4.4585, -7.72, -7.2, -57,
+      -3.8373, -1.38, -7.7, -6,
+      -3.5022, 1.15, -11.1, 12
+    )),
+    k7 = mat(c(
+      -4.6763, -7.78, -5.1, -73,
+      -4.0535, -0.76, -10.0, -7,
+      -3.7165, 2.04, -14.7, 15
+    )),
+    k8 = mat(c(
+      -4.8772, -7.64, -2.4, -116,
+      -4.2513, -0.03, -12.0, -19,
+      -3.9135, 3.10, -20.3, 25
+    ))
   )
-
-  if (k < 1 || k > 11) {
-    stop("k doit etre compris entre 1 et 11.")
-  }
-  table_cv[[d]][k, ]
+  
+  # Coefficients theta - constant term - Table 3, Ericsson, MacKinnon (2000)
+  ecm_c <- list(
+    k1 = mat(c(
+      -3.4307, -6.52, -4.7, -10,
+      -2.8617, -2.81, -3.2, 37,
+      -2.5668, -1.56, 2.1, -29
+    )),
+    k2 = mat(c(
+      -3.7948, -7.87, -3.6, -28,
+      -3.2145, -3.21, -2.0, 17,
+      -2.9083, -1.55, 1.9, -25
+    )),
+    k3 = mat(c(
+      -4.0947, -8.59, -2.0, -65,
+      -3.5057, -3.27, 1.1, -34,
+      -3.1924, -1.23, 2.1, -39
+    )),
+    k4 = mat(c(
+      -4.3555, -8.90, -6.7, -31,
+      -3.7592, -2.92, -3.7, 5,
+      -3.4412, -0.53, -4.5, 4
+    )),
+    k5 = mat(c(
+      -4.5859, -9.14, -2.5, -78,
+      -3.9856, -2.50, -1.7, -35,
+      -3.6635, 0.21, -6.0, -8
+    )),
+    k6 = mat(c(
+      -4.7970, -9.04, -5.6, -66,
+      -4.1922, -1.73, -7.8, -9,
+      -3.8670, 1.26, -12.7, 14
+    )),
+    k7 = mat(c(
+      -4.9912, -8.85, -5.1, -72,
+      -4.3831, -0.90, -12.2, 1,
+      -4.0556, 2.39, -18.8, 27
+    )),
+    k8 = mat(c(
+      -5.1723, -8.58, -2.0, -113,
+      -4.5608, 0.02, -15.4, -2,
+      -4.2310, 3.59, -25.6, 44
+    ))
+  )
+  
+  # Coefficients theta - constant term and linear trend - Table 4, Ericsson, MacKinnon (2000)
+  ecm_ct <- list(
+    k1 = mat(c(
+      -3.9593, -8.99, -4.9, 39,
+      -3.4108, -4.38, 4.5, -21,
+      -3.1272, -2.57, 3.5, -7
+    )),
+    k2 = mat(c(
+      -4.2488, -10.04, -4.1, -1,
+      -3.6873, -4.56, 2.2, 1,
+      -3.3927, -2.41, 3.4, -14
+    )),
+    k3 = mat(c(
+      -4.4981, -10.69, 0.6, -58,
+      -3.9263, -4.47, 5.2, -38,
+      -3.6249, -1.86, 1.1, -10
+    )),
+    k4 = mat(c(
+      -4.7214, -10.94, 1.6, -77,
+      -4.1421, -3.99, 2.8, -35,
+      -3.8342, -1.16, 0.4, -23
+    )),
+    k5 = mat(c(
+      -4.9255, -10.86, 1.2, -94,
+      -4.3392, -3.37, 1.6, -47,
+      -4.0271, -0.17, -4.4, -14
+    )),
+    k6 = mat(c(
+      -5.1137, -10.72, 1.4, -96,
+      -4.5227, -2.52, -2.8, -32,
+      -4.2067, 0.94, -9.9, 0
+    )),
+    k7 = mat(c(
+      -5.2923, -10.11, -4.0, -75,
+      -4.6952, -1.43, -10.6, -5,
+      -4.3751, 2.18, -16.9, 18
+    )),
+    k8 = mat(c(
+      -5.4565, -9.77, -1.5, -106,
+      -4.8569, -0.43, -14.4, -3,
+      -4.5344, 3.52, -24.9, 40
+    ))
+  )
+  
+  tables <- list(nc = ecm_nc, c = ecm_c, ct = ecm_ct)
+  vec_theta <- tables[[d]][[paste0("k", k)]]
+  
+  # critical value
+  Ta <- size - h
+  critical_val <- vec_theta[, "theta_inf"] +
+    vec_theta[, "theta_1"] / Ta +
+    vec_theta[, "theta_2"] / Ta^2 +
+    vec_theta[, "theta_3"] / Ta^3
+  
+  return(critical_val)
 }
 
 
@@ -102,29 +205,33 @@ coeff_tableau <- function(estim, divise_fr = TRUE) {
     value = glue::glue("{round(estimate, 3)}{stars} <br>({round(statistic, 2)})")
   )
 
-  endog          <- all.vars(formula(estim))[1]
-  var_ecart_lt   <- names(estim$coefficients)[grep("ecart", names(estim$coefficients))]
-  var_lt         <- grep("^(?!.*delta).*lag.*$", names(estim$coefficients), value = TRUE, perl = TRUE)
-  if (length(var_ecart_lt) != 0) {
-    var_force_rappel <- var_ecart_lt
-  } else {
+  endog <- all.vars(stats::formula(estim))[1]
+  check_presence_var_ecart_lt <- any(grepl("ecart", names(estim$coefficients)) & grepl("lt", names(estim$coefficients)))
+  var_lt <- grep("^(?!.*delta).*lag.*$", names(estim$coefficients), value = TRUE, perl = TRUE) # var de LT avec lag() et pas delta
+  if (isTRUE(check_presence_var_ecart_lt)){
+    var_force_rappel <- names(estim$coefficients)[grep("ecart", names(estim$coefficients))]
+  }else{
     var_force_rappel <- var_lt[grepl(endog, var_lt)]
   }
   var_lt <- setdiff(var_lt, var_force_rappel)
 
-  vars               <- unique(sub(".*\\.", "", all.vars(formula(estim))))
-  vars_sans_dummies  <- vars[!grepl("^i.*q.*", vars)]
-  k                  <- ifelse(length(var_ecart_lt) == 1, length(vars_sans_dummies) - 1, length(vars_sans_dummies))
-
-  has_intercept <- attr(terms(estim), "intercept") == 1
-  has_trend     <- any(grepl("temps|trend", vars, ignore.case = TRUE))
+  # Vérifie s'il y a une constante et trend => d
+  has_intercept <- attr(stats::terms(estim), "intercept") == 1
+  has_trend <- any(grepl("temps|trend", names(estim$coefficients), ignore.case = TRUE))
   d <- dplyr::case_when(
     has_intercept && has_trend ~ "ct",
     has_intercept              ~ "c",
     TRUE                       ~ "nc"
   )
-
-  critical_val <- ericsson_mackinnon_critical_val(d = d, k = k)
+  
+  # Nombre de variables dans x => k
+  k <- length(all.vars(stats::as.formula(paste("~", paste(c(var_force_rappel, var_lt), collapse = "+")))))
+  k <- ifelse(check_presence_var_ecart_lt, k + 1, k) # on imagine que la variable ecart=y-z donc je rajoute 1 variable
+  # Nombre de régresseurs (non contraints) => h (j'ai inclus les dummy)
+  h <- length(estim$coefficients)
+  
+  # Les valeurs critiques correspondantes selon Ericsson-Mackinnon aux seuils de 1%,5%,10%
+  critical_val <- ericsson_mackinnon_critical_val(d = d, k = k, size = stats::nobs(estim), h = h)
 
   coef_info <- dplyr::mutate(
     coef_info,
@@ -142,7 +249,7 @@ coeff_tableau <- function(estim, divise_fr = TRUE) {
     value = glue::glue("{round(estimate, 3)}{stars} <br>({round(statistic, 2)})")
   )
 
-  stats::setNames(coef_info$value, coef_info$term)
+  return(stats::setNames(coef_info$value, coef_info$term))
 }
 
 
@@ -162,19 +269,59 @@ coeff_tableau <- function(estim, divise_fr = TRUE) {
 #' @return tibble avec les colonnes \code{Groupe}, \code{Variables} et \code{nom_col}
 #' @export
 make_table_ecm <- function(table_resultats, data, estim, nom_col, affiche_dum = TRUE, divise_fr = TRUE) {
-  endog        <- all.vars(formula(estim))[1]
-  var_ecart_lt <- names(estim$coefficients)[grep("ecart", names(estim$coefficients))]
-  var_lt       <- grep("^(?!.*delta).*lag.*$", names(estim$coefficients), value = TRUE, perl = TRUE)
-  var_ct       <- setdiff(names(estim$coefficients), c(var_ecart_lt, var_lt))
-  if (length(var_ecart_lt) != 0) {
-    var_force_rappel <- var_ecart_lt
+  vars  <- names(estim$coefficients)
+  endog <- all.vars(stats::formula(estim))[1]
+  
+  # Vérifie que la variable dépendante est bien un delta(log(.))
+  is_delta_log <- grepl("delta\\(1, log\\(", stats::formula(estim)[2])
+  if (!is_delta_log) {
+    stop("La variable dépendante n'est pas un delta(log(.))")
+  }
+  is_delta_delta_log <- grepl("delta\\(1, delta\\(1, log\\(", stats::formula(estim)[2]) # estim Phillips notamment
+  if (is_delta_delta_log) {
+    stop("Variable endogène en delta(delta(log(.))) : cette fonction n'est pas adaptée, prendre dans le code fonctions_prix_salaires.R")
+  }
+  
+  # Coefs imposés avec offset() ? si oui, on les ajoute aux variables pour les afficher dans le tableau
+  offset_var <- grep("^offset\\(", colnames(estim$model), value = TRUE)
+  if (length(offset_var) > 0) {
+    noms_offset <- sub("^offset\\((.*)\\)$", "\\1", offset_var)
+    vars <- c(vars, noms_offset)
+  }
+  
+  # Variables de long-terme, court-terme et force de rappel, puis extraction des coeff
+  check_presence_var_ecart_lt <- any(grepl("ecart", names(estim$coefficients)) & grepl("lt", names(estim$coefficients)))
+  var_lt <- grep("^(?!.*delta).*lag.*$", names(estim$coefficients), value = TRUE, perl = TRUE)
+  var_ct <- setdiff(vars, var_lt)
+  if (check_presence_var_ecart_lt) {
+    var_force_rappel <- vars[grep("ecart", vars)]
+    message(glue::glue("Le coefficient de la variable {var_force_rappel} est la force de rappel"))
   } else {
     var_force_rappel <- var_lt[grepl(endog, var_lt)]
   }
   var_lt <- setdiff(var_lt, var_force_rappel)
-
+  
   ecm_coefs <- coeff_tableau(estim, divise_fr = divise_fr)
 
+  # Coefs imposés à 1 via offset() : on rajoute "1 <br>(c)"
+  if (length(offset_var) > 0) {
+    coef_offset <- stats::setNames(rep("1 <br>(c)", length(noms_offset)), noms_offset)
+    ecm_coefs <- c(coef_offset, ecm_coefs)
+  }
+  
+  # Coefs imposés dans la relation de long-terme, ex I(x - z)
+  if (grepl("^I\\(.*\\)$", var_force_rappel)) {
+    expr  <- paste0("+ ", sub("^I\\((.*)\\)$", "\\1", var_force_rappel))
+    ops   <- regmatches(expr, gregexpr("[+-]", expr))[[1]]
+    terms <- trimws(unlist(strsplit(sub("^[+-]", "", expr), "\\s*[+-]\\s*")))
+    keep  <- !grepl(endog, terms)
+    terms <- terms[keep]
+    ops   <- ops[keep]
+    coef_impose <- stats::setNames(ifelse(ops == "-", "1 <br>(c)", "-1 <br>(c)"), terms)
+    ecm_coefs   <- c(coef_impose, ecm_coefs)
+    var_lt      <- c(var_lt, terms)
+  }
+  
   lignes_utilisees  <- as.numeric(rownames(estim$model))
   periodes_utilisees <- data$date[lignes_utilisees]
   periode <- paste0(
@@ -236,5 +383,7 @@ make_table_ecm <- function(table_resultats, data, estim, nom_col, affiche_dum = 
     dum    = ifelse(grepl("^i.*q.*", Variables), Variables, NA)
   )
   table_resultats <- dplyr::arrange(table_resultats, Groupe, dum)
-  dplyr::select(table_resultats, -dum)
+  table_resultats <- dplyr::select(table_resultats, -dum)
+  
+  return(table_resultats)
 }
